@@ -5,7 +5,7 @@ import { getProfile, updateProfile, changePassword, uploadAvatar, getUserActivit
 import { toast } from 'react-toastify';
 import { youth } from '@/assets/images';
 import {
-  UserIcon,
+UserIcon,
   EnvelopeIcon,
   KeyIcon,
   CalendarIcon,
@@ -14,7 +14,13 @@ import {
   MapPinIcon,
   PhoneIcon,
   ClockIcon,
-  TrophyIcon
+  TrophyIcon,
+  ChartBarIcon,
+  ArrowUpIcon,
+  CheckBadgeIcon,
+  CameraIcon,
+  BellIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '@/utils/dateUtils';
 
@@ -260,7 +266,7 @@ const ProfilePage = () => {
   }
   
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-10 max-w-7xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Hồ sơ cá nhân</h1>
       
       <div className="bg-white rounded-xl shadow-md p-6 mb-8">
@@ -597,118 +603,119 @@ const ProfilePage = () => {
       
       {activeTab === 'settings' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Update profile form */}
+          {/* Update profile form - Thiết kế form đẹp hơn */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Cập nhật thông tin cá nhân</h2>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-3">
+                <UserIcon className="h-5 w-5 text-primary-600" />
+                <h2 className="text-xl font-bold text-gray-900">Cập nhật thông tin cá nhân</h2>
               </div>
-              <div className="p-6">
-                <form onSubmit={handleUpdateProfile} className="space-y-6">
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="p-8">
+                <form onSubmit={handleUpdateProfile} className="space-y-8">
+                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="fullName" className="form-label">
+                      <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-1">
                         Họ và tên <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="fullName"
-                        className={`form-input ${errors.fullName ? 'border-red-500' : ''}`}
+                        className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                       />
-                      {errors.fullName && <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>}
+                      {errors.fullName && <p className="mt-2 text-sm text-red-600">{errors.fullName}</p>}
                     </div>
                     
                     <div>
-                      <label htmlFor="email" className="form-label">
+                      <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
                         Email <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
                         id="email"
-                        className={`form-input ${errors.email ? 'border-red-500' : ''}`}
+                        className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
-                      {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                      {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
                     </div>
                     
                     <div>
-                      <label htmlFor="studentId" className="form-label">
+                      <label htmlFor="studentId" className="block text-sm font-semibold text-gray-700 mb-1">
                         MSSV
                       </label>
                       <input
                         type="text"
                         id="studentId"
-                        className="form-input"
+                        className="block w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200"
                         value={studentId}
                         onChange={(e) => setStudentId(e.target.value)}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="faculty" className="form-label">
+                      <label htmlFor="faculty" className="block text-sm font-semibold text-gray-700 mb-1">
                         Khoa
                       </label>
                       <input
                         type="text"
                         id="faculty"
-                        className="form-input"
+                        className="block w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200"
                         value={faculty}
                         onChange={(e) => setFaculty(e.target.value)}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="classroom" className="form-label">
+                      <label htmlFor="classroom" className="block text-sm font-semibold text-gray-700 mb-1">
                         Lớp
                       </label>
                       <input
                         type="text"
                         id="classroom"
-                        className="form-input"
+                        className="block w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200"
                         value={classroom}
                         onChange={(e) => setClassroom(e.target.value)}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="phoneNumber" className="form-label">
+                      <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1">
                         Số điện thoại <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
                         id="phoneNumber"
-                        className={`form-input ${errors.phoneNumber ? 'border-red-500' : ''}`}
+                        className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.phoneNumber ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                       />
-                      {errors.phoneNumber && <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>}
+                      {errors.phoneNumber && <p className="mt-2 text-sm text-red-600">{errors.phoneNumber}</p>}
                     </div>
                     
                     <div>
-                      <label htmlFor="dateOfBirth" className="form-label">
+                      <label htmlFor="dateOfBirth" className="block text-sm font-semibold text-gray-700 mb-1">
                         Ngày sinh <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         id="dateOfBirth"
-                        className={`form-input ${errors.dateOfBirth ? 'border-red-500' : ''}`}
+                        className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.dateOfBirth ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                         value={dateOfBirth}
                         onChange={(e) => setDateOfBirth(e.target.value)}
                       />
-                      {errors.dateOfBirth && <p className="mt-1 text-sm text-red-500">{errors.dateOfBirth}</p>}
+                      {errors.dateOfBirth && <p className="mt-2 text-sm text-red-600">{errors.dateOfBirth}</p>}
                     </div>
                     
                     <div className="sm:col-span-2">
-                      <label htmlFor="address" className="form-label">
+                      <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-1">
                         Địa chỉ
                       </label>
                       <input
                         type="text"
                         id="address"
-                        className="form-input"
+                        className="block w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                       />
@@ -718,7 +725,7 @@ const ProfilePage = () => {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="btn btn-primary"
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -738,14 +745,15 @@ const ProfilePage = () => {
               </div>
             </div>
             
-            {/* Upload new avatar */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden mt-8">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Ảnh đại diện</h2>
+            {/* Upload new avatar - Thiết kế mới */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-8">
+              <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-3">
+                <CameraIcon className="h-5 w-5 text-primary-600" />
+                <h2 className="text-xl font-bold text-gray-900">Ảnh đại diện</h2>
               </div>
-              <div className="p-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6">
-                  <div className="relative rounded-full overflow-hidden h-32 w-32 bg-gray-100">
+              <div className="p-8">
+                <div className="flex flex-col sm:flex-row items-center gap-8">
+                  <div className="relative rounded-full overflow-hidden h-32 w-32 bg-gray-100 border-4 border-gray-100 shadow-md">
                     <img
                       src={avatarPreview || user.avatar || youth.avatarDefault}
                       alt={user.full_name}
@@ -753,8 +761,8 @@ const ProfilePage = () => {
                     />
                   </div>
                   
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="flex-1 space-y-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Thay đổi ảnh đại diện
                     </label>
                     <div className="flex items-center gap-3">
@@ -768,24 +776,26 @@ const ProfilePage = () => {
                       />
                       <label
                         htmlFor="avatar"
-                        className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                       >
+                        <CameraIcon className="-ml-1 mr-2 h-4 w-4" />
                         Chọn ảnh
                       </label>
                       {avatarFile && (
                         <button
                           type="button"
-                          className="btn btn-primary"
+                          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                           onClick={() => {
                             // Handle avatar upload
                             toast.success('Cập nhật ảnh đại diện thành công');
                           }}
                         >
+                          <ArrowUpIcon className="-ml-1 mr-2 h-4 w-4" />
                           Tải lên
                         </button>
                       )}
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p className="text-xs text-gray-500">
                       Chấp nhận các định dạng JPG, GIF hoặc PNG. Kích thước tối đa 2MB.
                     </p>
                   </div>
@@ -794,60 +804,61 @@ const ProfilePage = () => {
             </div>
           </div>
           
-          {/* Change password */}
+          {/* Change password - Thiết kế form đẹp hơn */}
           <div>
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Đổi mật khẩu</h2>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-3">
+                <KeyIcon className="h-5 w-5 text-primary-600" />
+                <h2 className="text-xl font-bold text-gray-900">Đổi mật khẩu</h2>
               </div>
-              <div className="p-6">
-                <form onSubmit={handleChangePassword} className="space-y-4">
+              <div className="p-8">
+                <form onSubmit={handleChangePassword} className="space-y-6">
                   <div>
-                    <label htmlFor="currentPassword" className="form-label">
+                    <label htmlFor="currentPassword" className="block text-sm font-semibold text-gray-700 mb-1">
                       Mật khẩu hiện tại
                     </label>
                     <input
                       type="password"
                       id="currentPassword"
-                      className={`form-input ${errors.currentPassword ? 'border-red-500' : ''}`}
+                      className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.currentPassword ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                     />
-                    {errors.currentPassword && <p className="mt-1 text-sm text-red-500">{errors.currentPassword}</p>}
+                    {errors.currentPassword && <p className="mt-2 text-sm text-red-600">{errors.currentPassword}</p>}
                   </div>
                   
                   <div>
-                    <label htmlFor="newPassword" className="form-label">
+                    <label htmlFor="newPassword" className="block text-sm font-semibold text-gray-700 mb-1">
                       Mật khẩu mới
                     </label>
                     <input
                       type="password"
                       id="newPassword"
-                      className={`form-input ${errors.newPassword ? 'border-red-500' : ''}`}
+                      className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.newPassword ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                     />
-                    {errors.newPassword && <p className="mt-1 text-sm text-red-500">{errors.newPassword}</p>}
+                    {errors.newPassword && <p className="mt-2 text-sm text-red-600">{errors.newPassword}</p>}
                   </div>
                   
                   <div>
-                    <label htmlFor="confirmPassword" className="form-label">
+                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1">
                       Xác nhận mật khẩu mới
                     </label>
                     <input
                       type="password"
                       id="confirmPassword"
-                      className={`form-input ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                      className={`block w-full rounded-lg px-4 py-3 bg-gray-50 border ${errors.confirmPassword ? 'border-red-500 bg-red-50' : 'border-gray-200'} focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-colors duration-200`}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />
-                    {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>}
                   </div>
                   
                   <div className="pt-4">
                     <button
                       type="submit"
-                      className="btn btn-primary w-full"
+                      className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
                       disabled={isLoading}
                     >
                       {isLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}

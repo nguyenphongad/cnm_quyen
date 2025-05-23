@@ -60,7 +60,7 @@ const Header = ({ toggleSidebar, toggleSidebarCollapse, isSidebarCollapsed }: He
             </button>
             
             {/* Desktop sidebar toggle button */}
-            {toggleSidebarCollapse && (
+            {/* {toggleSidebarCollapse && (
               <button
                 type="button"
                 onClick={toggleSidebarCollapse}
@@ -73,7 +73,7 @@ const Header = ({ toggleSidebar, toggleSidebarCollapse, isSidebarCollapsed }: He
                   <ChevronDoubleLeftIcon className="h-5 w-5" />
                 )}
               </button>
-            )}
+            )} */}
             
             <div className="ml-6 flex items-center">
               <span className="text-lg font-semibold text-gray-900">
