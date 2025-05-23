@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Cấu hình API
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.API_BASE_URL;
 let authToken = null;
 
 // Hàm để đăng nhập và lấy token
@@ -11,8 +11,10 @@ const authenticate = async () => {
     try {
 
         console.log("API_BASE_URL : ", API_BASE_URL);
+        console.log("API_BASE_URL username : ",  process.env.API_USERNAME);
+        console.log("API_BASE_URL password : ",  process.env.API_PASSWORD);
 
-        const response = await axios.post(`${API_BASE_URL}token/`, {
+        const response = await axios.post(`${API_BASE_URL}/api/token/`, {
             username: process.env.API_USERNAME,
             password: process.env.API_PASSWORD
         });
@@ -36,6 +38,11 @@ const callAPI = async (endpoint, method = 'GET', params = {}, data = null) => {
     if (!authToken) {
         await authenticate();
     }
+
+    console.log("endpoint :", endpoint);
+    console.log("method :", method);
+    console.log("params :", params);
+    console.log("data :", data);
 
     try {
         const config = {
@@ -73,11 +80,11 @@ const callAPI = async (endpoint, method = 'GET', params = {}, data = null) => {
 
 // Các hàm truy vấn dữ liệu cụ thể
 export const getActivities = async (page = 1, pageSize = 10) => {
-    return callAPI('activities/', 'GET', { page, page_size: pageSize });
+    return callAPI('/api/activities/', 'GET', { page, page_size: pageSize });
 };
 
 export const getActivityById = async (activityId) => {
-    return callAPI(`activities/${activityId}/`);
+    return callAPI(`/api/activities/${activityId}/`);
 };
 
 // export const getMembers = async (page = 1, pageSize = 10, filters = {}) => {

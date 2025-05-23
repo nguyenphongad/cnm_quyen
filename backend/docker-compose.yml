@@ -34,7 +34,6 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - API_BASE_URL=http://backend:8000/api
     depends_on:
       - backend
     networks:

@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-
+ALLOWED_HOSTS = ['*']
 # ... existing code ...
 
 # Các ứng dụng đã cài đặt

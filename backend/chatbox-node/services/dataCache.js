@@ -62,13 +62,17 @@ export const getActivitiesData = async (forceRefresh = false) => {
 // // Cập nhật tất cả cache
 export const refreshAllCaches = async () => {
     try {
-        await Promise.all([
+        const ref = await Promise.all([
             getActivitiesData(true),
             // getMembersData(true),
             // getPostsData(true)
         ]);
+
+
+        console.log("ref abc : ", ref);
+
         console.log('Đã cập nhật tất cả cache dữ liệu');
-        return true; 
+        return true;
     } catch (error) {
         console.error('Lỗi khi cập nhật cache:', error);
         return false;
