@@ -17,6 +17,28 @@ services:
              python manage.py collectstatic --no-input &&
              python manage.py runserver 0.0.0.0:8000"
     restart: always
+    networks:
+      - app-network
+
+  chatbox-node:
+    build:
+      context: ./chatbox-node
+      dockerfile: Dockerfile
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./chatbox-node:/app
+      - /app/node_modules
+    env_file:
+      - ./chatbox-node/.env
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - API_BASE_URL=http://backend:8000/api
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
   db:
     image: postgres:14
@@ -30,6 +52,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
@@ -39,6 +63,12 @@ services:
       - "8081:8978"
     depends_on:
       - db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   static_volume:

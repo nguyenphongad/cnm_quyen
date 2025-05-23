@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import { toast } from 'react-toastify';
 import { getMembers, deleteMember, getMemberStats, MemberStats } from '@/services/memberService';
+import { useNavigate } from 'react-router-dom';
+import { navigateTo } from '@/services/navigationService';
 
 const MembersManagementPage = () => {
   const { user } = useAuth();
@@ -28,6 +30,9 @@ const MembersManagementPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
   const [activeTab, setActiveTab] = useState('list');
+
+  const navigation = useNavigate();
+
 
   useEffect(() => {
     fetchMembers();
@@ -115,12 +120,13 @@ const MembersManagementPage = () => {
 
   const handleCreateMember = () => {
     // Chuyển hướng đến trang tạo thành viên
-    window.location.href = '/members/create';
+    navigateTo('/members/create');
   };
 
   const handleEditMember = (id: number) => {
     // Chuyển hướng đến trang chỉnh sửa thành viên
-    window.location.href = `/members/edit/${id}`;
+    // window.location.href = `/members/edit/${id}`;
+   navigateTo(`/members/edit/${id}`);
   };
 
   const openDeleteModal = (member: User) => {

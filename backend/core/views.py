@@ -48,10 +48,19 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [IsAdmin()]
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get','patch','put'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        
+        elif request.method in ['PATCH', 'PUT']:
+            partial = request.method == 'PATCH'
+            serializer = UserUpdateSerializer(request.user, data=request.data, partial=partial)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAdminOrCanBoDoan])
     def search(self, request):

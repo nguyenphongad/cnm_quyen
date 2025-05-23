@@ -1,61 +1,257 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { sendChatbotQuery } from '@/services/dashboardService';
+import './ChatbotButton.css';
 
 const ChatbotButton: React.FC = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatQuery, setChatQuery] = useState('');
-  const [chatResponses, setChatResponses] = useState<{query: string, response: string}[]>([]);
+  const [chatResponses, setChatResponses] = useState<{query: string, response: string, isTyping?: boolean}[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Tự động cuộn xuống khi có tin nhắn mới
-  React.useEffect(() => {
+  useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatResponses]);
+
+  const handleToggleChat = (open: boolean) => {
+    setIsAnimating(true);
+    if (open) {
+      setChatOpen(true);
+    } else {
+      // Chờ animation hoàn thành trước khi đóng
+      setTimeout(() => {
+        setChatOpen(false);
+        setIsAnimating(false);
+      }, 300); // Thời gian animation
+    }
+  };
+
+  // Hàm xử lý định dạng tin nhắn
+  const formatMessage = (text: string) => {
+    // Thay thế các ký tự xuống dòng
+    let formattedText = text.replace(/\\n/g, '<br>');
+    formattedText = formattedText.replace(/\n/g, '<br>');
+    
+    // Xử lý định dạng đậm (text giữa hai dấu **)
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Xử lý danh sách có dấu •
+    formattedText = formattedText.replace(/• (.*?)(?=<br>|$)/g, '<li>$1</li>');
+    
+    // Xử lý danh sách có dấu *
+    formattedText = formattedText.replace(/\* (.*?)(?=<br>|$)/g, '<li>$1</li>');
+    
+    // Bọc các thẻ li trong ul
+    if (formattedText.includes('<li>')) {
+      formattedText = formattedText.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+    }
+    
+    return formattedText;
+  };
+
+  // Hàm tách nội dung thành từng chữ hoặc thẻ HTML
+  const splitContentIntoParts = (text: string) => {
+    // Định dạng text
+    const formattedText = formatMessage(text);
+    
+    // Phân tích HTML để tách các thẻ và text
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = formattedText;
+    
+    // Kết quả là mảng các phần: text hoặc thẻ HTML
+    const parts: Array<{type: string, content?: string, tag?: string, attrs?: Record<string, string>}> = [];
+    
+    // Hàm đệ quy để xử lý các node
+    function processNode(node: ChildNode) {
+      if (node.nodeType === Node.TEXT_NODE) { // Text node
+        // Chia text thành từng từ để hiển thị mượt mà
+        const words = node.textContent?.split(/(\s+)/) || [];
+        words.forEach(word => {
+          if (word !== '') {
+            parts.push({ type: 'text', content: word });
+          }
+        });
+      } else if (node.nodeType === Node.ELEMENT_NODE) { // Element node
+        const element = node as Element;
+        // Lưu thẻ mở
+        parts.push({ 
+          type: 'tagOpen', 
+          tag: element.nodeName.toLowerCase(), 
+          attrs: getAttributes(element) 
+        });
+        
+        // Xử lý các node con
+        Array.from(element.childNodes).forEach(child => processNode(child));
+        
+        // Lưu thẻ đóng
+        parts.push({ type: 'tagClose', tag: element.nodeName.toLowerCase() });
+      }
+    }
+    
+    // Lấy các thuộc tính của node
+    function getAttributes(node: Element) {
+      const attrs: Record<string, string> = {};
+      Array.from(node.attributes).forEach(attr => {
+        attrs[attr.name] = attr.value;
+      });
+      return attrs;
+    }
+    
+    // Bắt đầu xử lý từ các node gốc
+    Array.from(tempDiv.childNodes).forEach(node => {
+      processNode(node);
+    });
+    
+    return parts;
+  };
+
+  // Tạo hiệu ứng typing
+  const typeResponse = async (response: string, index: number) => {
+    const parts = splitContentIntoParts(response);
+    let visibleParts: typeof parts = [];
+    let currentIndex = 0;
+
+    const updateMessage = () => {
+      if (currentIndex < parts.length) {
+        visibleParts.push(parts[currentIndex]);
+        
+        // Cập nhật message hiện tại với phần hiển thị mới
+        setChatResponses(prev => {
+          const newResponses = [...prev];
+          newResponses[index] = {
+            ...newResponses[index],
+            renderedResponse: formatMessageParts(visibleParts),
+            isTyping: true
+          };
+          return newResponses;
+        });
+        
+        currentIndex++;
+        
+        // Tính toán thời gian chờ dựa trên độ dài của phần tiếp theo
+        const delay = parts[currentIndex - 1].type === 'text' ? 
+          Math.min(20 * (parts[currentIndex - 1].content?.length || 1), 100) : 10;
+          
+        typingTimeoutRef.current = setTimeout(updateMessage, delay);
+      } else {
+        // Hoàn thành typing
+        setChatResponses(prev => {
+          const newResponses = [...prev];
+          newResponses[index] = {
+            ...newResponses[index],
+            isTyping: false
+          };
+          return newResponses;
+        });
+      }
+    };
+    
+    updateMessage();
+  };
+
+  // Hàm kết hợp các phần đã xử lý thành HTML
+  const formatMessageParts = (parts: Array<{type: string, content?: string, tag?: string, attrs?: Record<string, string>}>) => {
+    let html = '';
+    
+    parts.forEach(part => {
+      if (part.type === 'text') {
+        html += part.content;
+      } else if (part.type === 'tagOpen') {
+        html += `<${part.tag}`;
+        // Thêm các thuộc tính
+        for (const [name, value] of Object.entries(part.attrs || {})) {
+          html += ` ${name}="${value}"`;
+        }
+        html += '>';
+      } else if (part.type === 'tagClose' && part.tag) {
+        html += `</${part.tag}>`;
+      }
+    });
+    
+    return html;
+  };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatQuery.trim() || isProcessing) return;
 
     setIsProcessing(true);
+    const userMessage = chatQuery;
+    setChatQuery('');
+    
     // Thêm tin nhắn của người dùng trước
-    const newMessage = { query: chatQuery, response: 'Đang xử lý...' };
-    setChatResponses(prev => [...prev, newMessage]);
+    setChatResponses(prev => [
+      ...prev, 
+      { 
+        query: userMessage, 
+        response: 'Đang xử lý...', 
+        renderedResponse: 'Đang xử lý...',
+        isTyping: true 
+      }
+    ]);
     
     try {
-      const response = await sendChatbotQuery(chatQuery);
+      const response = await sendChatbotQuery(userMessage);
+      console.log('Chatbot response:', response);
       
-      // Cập nhật phản hồi
-      setChatResponses(prev => 
-        prev.map((item, index) => 
-          index === prev.length - 1 
-            ? { query: chatQuery, response: response.answer } 
-            : item
-        )
-      );
+      // Cập nhật phản hồi và bắt đầu typing effect
+      setChatResponses(prev => {
+        const newResponses = [...prev];
+        const lastIndex = newResponses.length - 1;
+        
+        newResponses[lastIndex] = {
+          ...newResponses[lastIndex],
+          response: response.response,
+          renderedResponse: '' // Bắt đầu với chuỗi rỗng
+        };
+        
+        return newResponses;
+      });
+      
+      // Bắt đầu hiệu ứng typing cho tin nhắn mới nhất
+      typeResponse(response.response, chatResponses.length);
+      
     } catch (error) {
       console.error('Error sending chatbot query:', error);
-      setChatResponses(prev => 
-        prev.map((item, index) => 
-          index === prev.length - 1 
-            ? { query: chatQuery, response: 'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này.' } 
-            : item
-        )
-      );
+      
+      setChatResponses(prev => {
+        const newResponses = [...prev];
+        const lastIndex = newResponses.length - 1;
+        
+        newResponses[lastIndex] = {
+          ...newResponses[lastIndex],
+          response: 'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này.',
+          renderedResponse: 'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này.',
+          isTyping: false
+        };
+        
+        return newResponses;
+      });
     } finally {
-      setChatQuery('');
       setIsProcessing(false);
     }
   };
+
+  // Hủy timeout khi component unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!chatOpen ? (
         <button
-          onClick={() => setChatOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg flex items-center justify-center transition-all"
+          onClick={() => handleToggleChat(true)}
+          className="chat-button-open"
           aria-label="Mở trợ lý ảo"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -63,12 +259,12 @@ const ChatbotButton: React.FC = () => {
           </svg>
         </button>
       ) : (
-        <div className="bg-white rounded-lg shadow-xl w-80 sm:w-96 flex flex-col overflow-hidden border border-gray-200 max-h-[70vh]">
-          <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-            <h3 className="font-medium">Trợ lý Đoàn trường</h3>
+        <div className={`chat-container ${isAnimating ? 'chat-container-opening' : ''}`} style={{ width: '600px', height: '500px' }}>
+          <div className="chat-header">
+            <h3 className="font-medium chat-title-animation">Trợ lý Đoàn trường</h3>
             <button 
-              onClick={() => setChatOpen(false)}
-              className="text-white hover:text-gray-200"
+              onClick={() => handleToggleChat(false)}
+              className="chat-close-button"
               aria-label="Đóng"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -78,32 +274,45 @@ const ChatbotButton: React.FC = () => {
           </div>
           
           <div 
-            className="flex-1 p-4 overflow-y-auto max-h-80 min-h-[250px] bg-gray-50"
+            className="chat-messages"
             ref={chatContainerRef}
           >
             {chatResponses.length === 0 ? (
-              <div className="text-gray-500 italic text-center mt-6">
+              <div className="chat-welcome">
                 <p>Xin chào! Tôi là trợ lý ảo của Đoàn trường.</p>
                 <p className="mt-2">Bạn có thể hỏi tôi về:</p>
-                <ul className="text-left list-disc pl-8 mt-2">
-                  <li>Thông tin về Đoàn trường</li>
-                  <li>Quy định, điều lệ Đoàn</li>
-                  <li>Hoạt động sắp diễn ra</li>
-                  <li>Cách thức tham gia các hoạt động</li>
+                <ul className="chat-welcome-list">
+                  <li className="chat-welcome-item-1">Thông tin về Đoàn trường</li>
+                  <li className="chat-welcome-item-2">Quy định, điều lệ Đoàn</li>
+                  <li className="chat-welcome-item-3">Hoạt động sắp diễn ra</li>
+                  <li className="chat-welcome-item-4">Cách thức tham gia các hoạt động</li>
                 </ul>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="chat-conversation">
                 {chatResponses.map((item, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-end">
-                      <div className="bg-blue-100 p-3 rounded-lg max-w-[80%] break-words">
+                  <div key={index} className="chat-message-group">
+                    <div className="chat-user-message">
+                      <div className="chat-user-bubble">
                         <p className="text-gray-800 text-sm">{item.query}</p>
                       </div>
                     </div>
-                    <div className="flex justify-start">
-                      <div className="bg-white p-3 rounded-lg border border-gray-200 max-w-[80%] break-words shadow-sm">
-                        <p className="text-gray-800 text-sm">{item.response}</p>
+                    <div className="chat-bot-message">
+                      <div className={`chat-bot-bubble ${item.isTyping ? 'typing' : ''}`}>
+                        {/* Sử dụng renderedResponse thay vì response để hiển thị từ từ */}
+                        <div 
+                          className="text-gray-800 text-sm" 
+                          dangerouslySetInnerHTML={{ 
+                            __html: item.renderedResponse || 'Đang xử lý...' 
+                          }}
+                        />
+                        {item.isTyping && (
+                          <span className="typing-indicator">
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -112,29 +321,35 @@ const ChatbotButton: React.FC = () => {
             )}
           </div>
           
-          <form onSubmit={handleChatSubmit} className="p-3 border-t border-gray-200">
-            <div className="flex space-x-2">
+          <form onSubmit={handleChatSubmit} className="chat-form">
+            <div className="chat-input-group">
               <input
                 type="text"
                 value={chatQuery}
                 onChange={(e) => setChatQuery(e.target.value)}
                 placeholder="Nhập câu hỏi của bạn..."
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="chat-input"
                 disabled={isProcessing}
               />
               <button
                 type="submit"
                 disabled={isProcessing || !chatQuery.trim()}
-                className={`p-2 rounded-lg ${
-                  isProcessing || !chatQuery.trim()
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                className={`chat-send-button ${
+                  isProcessing || !chatQuery.trim() ? 'chat-send-disabled' : ''
                 }`}
                 aria-label="Gửi"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                </svg>
+                {isProcessing ? (
+                  <span className="loading-dots">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                )}
               </button>
             </div>
           </form>
@@ -144,4 +359,4 @@ const ChatbotButton: React.FC = () => {
   );
 };
 
-export default ChatbotButton; 
+export default ChatbotButton;

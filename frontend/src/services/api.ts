@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
+import { navigateTo } from './navigationService';
+
 // Đọc URL API từ biến môi trường hoặc sử dụng giá trị mặc định
 const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api';
 console.log('API URL được cấu hình:', API_URL);
@@ -82,7 +84,7 @@ api.interceptors.response.use(
           console.log('Không tìm thấy refresh token, chuyển hướng về trang đăng nhập');
           // Không có refresh token, đăng xuất
           clearAuthTokens();
-          window.location.href = '/login';
+          navigateTo('/login', { replace: true });
           return Promise.reject(error);
         }
         
@@ -108,7 +110,8 @@ api.interceptors.response.use(
         console.error('Refresh token thất bại:', refreshError);
         // Nếu refresh thất bại, đăng xuất
         clearAuthTokens();
-        window.location.href = '/login?expired=true';
+        // window.location.href = '/login?expired=true';
+        navigateTo('/login', { replace: true });
         return Promise.reject(refreshError);
       }
     }

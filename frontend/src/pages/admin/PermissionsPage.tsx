@@ -270,10 +270,10 @@ const PermissionsPage = () => {
             Phân quyền truy cập cho các vai trò trong hệ thống
           </p>
         </div>
-        <Button onClick={handleCreatePermission} className="flex items-center justify-center">
+        {/* <Button onClick={handleCreatePermission} className="flex items-center justify-center">
           <PlusIcon className="h-5 w-5 mr-2" />
           Thêm quyền mới
-        </Button>
+        </Button> */}
       </div>
 
       {/* Tab chọn vai trò */}

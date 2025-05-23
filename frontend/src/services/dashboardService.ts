@@ -131,55 +131,69 @@ export const getActivityTypeChartData = async (): Promise<ChartData> => {
   }
 };
 
-export const sendChatbotQuery = async (query: string): Promise<{answer: string, sources: string[]}> => {
-  // Mock response
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
-
-  const answers: {[key: string]: {answer: string, sources: string[]}} = {
-    'giới thiệu về đoàn': {
-      answer: 'Đoàn TNCS Hồ Chí Minh là tổ chức chính trị - xã hội của thanh niên Việt Nam do Đảng Cộng sản Việt Nam và Chủ tịch Hồ Chí Minh sáng lập, lãnh đạo và rèn luyện. Đoàn bao gồm những thanh niên tiên tiến, phấn đấu vì mục tiêu, lý tưởng của Đảng là độc lập dân tộc gắn liền với chủ nghĩa xã hội, dân giàu, nước mạnh, dân chủ, công bằng, văn minh.',
-      sources: ['Điều lệ Đoàn TNCS Hồ Chí Minh']
-    },
-    'quy định đoàn phí': {
-      answer: 'Đoàn phí là 5.000 đồng/tháng (15.000 đồng/quý). Đoàn viên cần đóng trước ngày 15 của tháng đầu tiên mỗi quý. Việc đóng đoàn phí đầy đủ, đúng hạn là một trong những tiêu chí đánh giá đoàn viên.',
-      sources: ['Hướng dẫn thực hiện Điều lệ Đoàn', 'Quy định về đoàn phí']
-    },
-    'đoàn viên xuất sắc': {
-      answer: 'Để đạt danh hiệu Đoàn viên xuất sắc, bạn cần đáp ứng các tiêu chí sau: 1) Tham gia ít nhất 80% các hoạt động do Đoàn tổ chức, 2) Đóng đoàn phí đầy đủ, đúng hạn, 3) Có thành tích học tập hoặc công tác tốt, 4) Được tập thể Chi đoàn công nhận và biểu quyết.',
-      sources: ['Hướng dẫn xét danh hiệu thi đua', 'Quy định công tác thi đua khen thưởng']
-    },
-    'hoạt động sắp tới': {
-      answer: 'Các hoạt động sắp tới gồm: 1) Hiến máu nhân đạo (15/10/2023), 2) Hội thảo kỹ năng mềm (25/10/2023), 3) Cuộc thi Ý tưởng sáng tạo sinh viên (01/11 - 15/12/2023). Bạn có thể đăng ký tham gia qua website hoặc liên hệ trực tiếp với Ban chấp hành Đoàn trường.',
-      sources: ['Kế hoạch hoạt động Quý 4/2023', 'Thông báo của BCH Đoàn trường']
-    }
-  };
-
-  // Tìm câu trả lời phù hợp nhất
-  let bestMatch = {answer: '', sources: [] as string[]};
-  let highestMatchScore = 0;
-
-  const normalizedQuery = query.toLowerCase();
-  
-  for (const key in answers) {
-    if (normalizedQuery.includes(key)) {
-      const matchScore = key.length;
-      if (matchScore > highestMatchScore) {
-        highestMatchScore = matchScore;
-        bestMatch = answers[key];
-      }
-    }
-  }
-
-  // Nếu không tìm thấy kết quả phù hợp
-  if (highestMatchScore === 0) {
-    return {
-      answer: 'Xin lỗi, tôi không có thông tin về câu hỏi này. Bạn có thể hỏi về quy định đoàn phí, giới thiệu về đoàn, tiêu chí đoàn viên xuất sắc hoặc các hoạt động sắp tới.',
-      sources: []
-    };
-  }
-
-  return bestMatch;
+interface ChatbotResponse {
+  response: string;
 };
+
+export const sendChatbotQuery = async (query: string): Promise<ChatbotResponse> => {
+  try {
+    const response = await api.post('http://localhost:9999/api/chat/ask', { message: query });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching activity type chart data:', error);
+    throw error;
+  }
+}
+
+// export const sendChatbotQuery = async (query: string): Promise<{answer: string, sources: string[]}> => {
+//   // Mock response
+//   await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
+
+//   const answers: {[key: string]: {answer: string, sources: string[]}} = {
+//     'giới thiệu về đoàn': {
+//       answer: 'Đoàn TNCS Hồ Chí Minh là tổ chức chính trị - xã hội của thanh niên Việt Nam do Đảng Cộng sản Việt Nam và Chủ tịch Hồ Chí Minh sáng lập, lãnh đạo và rèn luyện. Đoàn bao gồm những thanh niên tiên tiến, phấn đấu vì mục tiêu, lý tưởng của Đảng là độc lập dân tộc gắn liền với chủ nghĩa xã hội, dân giàu, nước mạnh, dân chủ, công bằng, văn minh.',
+//       sources: ['Điều lệ Đoàn TNCS Hồ Chí Minh']
+//     },
+//     'quy định đoàn phí': {
+//       answer: 'Đoàn phí là 5.000 đồng/tháng (15.000 đồng/quý). Đoàn viên cần đóng trước ngày 15 của tháng đầu tiên mỗi quý. Việc đóng đoàn phí đầy đủ, đúng hạn là một trong những tiêu chí đánh giá đoàn viên.',
+//       sources: ['Hướng dẫn thực hiện Điều lệ Đoàn', 'Quy định về đoàn phí']
+//     },
+//     'đoàn viên xuất sắc': {
+//       answer: 'Để đạt danh hiệu Đoàn viên xuất sắc, bạn cần đáp ứng các tiêu chí sau: 1) Tham gia ít nhất 80% các hoạt động do Đoàn tổ chức, 2) Đóng đoàn phí đầy đủ, đúng hạn, 3) Có thành tích học tập hoặc công tác tốt, 4) Được tập thể Chi đoàn công nhận và biểu quyết.',
+//       sources: ['Hướng dẫn xét danh hiệu thi đua', 'Quy định công tác thi đua khen thưởng']
+//     },
+//     'hoạt động sắp tới': {
+//       answer: 'Các hoạt động sắp tới gồm: 1) Hiến máu nhân đạo (15/10/2023), 2) Hội thảo kỹ năng mềm (25/10/2023), 3) Cuộc thi Ý tưởng sáng tạo sinh viên (01/11 - 15/12/2023). Bạn có thể đăng ký tham gia qua website hoặc liên hệ trực tiếp với Ban chấp hành Đoàn trường.',
+//       sources: ['Kế hoạch hoạt động Quý 4/2023', 'Thông báo của BCH Đoàn trường']
+//     }
+//   };
+
+//   // Tìm câu trả lời phù hợp nhất
+//   let bestMatch = {answer: '', sources: [] as string[]};
+//   let highestMatchScore = 0;
+
+//   const normalizedQuery = query.toLowerCase();
+
+//   for (const key in answers) {
+//     if (normalizedQuery.includes(key)) {
+//       const matchScore = key.length;
+//       if (matchScore > highestMatchScore) {
+//         highestMatchScore = matchScore;
+//         bestMatch = answers[key];
+//       }
+//     }
+//   }
+
+//   // Nếu không tìm thấy kết quả phù hợp
+//   if (highestMatchScore === 0) {
+//     return {
+//       answer: 'Xin lỗi, tôi không có thông tin về câu hỏi này. Bạn có thể hỏi về quy định đoàn phí, giới thiệu về đoàn, tiêu chí đoàn viên xuất sắc hoặc các hoạt động sắp tới.',
+//       sources: []
+//     };
+//   }
+
+//   return bestMatch;
+// };
 
 export interface UnionInfo {
   name: string;

@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
+const navigate = useNavigate();
 // Mock API functions
 export const api = {
   get: async (url: string) => {
@@ -64,7 +65,8 @@ api.interceptors.response.use(
         // Nếu refresh token cũng hết hạn, đăng xuất
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        navigate.navigate('/login', { replace: true });
+        
         return Promise.reject(refreshError);
       }
     }

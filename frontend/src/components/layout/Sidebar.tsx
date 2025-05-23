@@ -20,6 +20,8 @@ import {
   ChevronDoubleRightIcon
 } from '@heroicons/react/24/outline';
 
+import logo  from '../../assets/images/logo_doan.png';
+
 interface SidebarProps {
   isOpen?: boolean;
   toggle?: () => void;
@@ -51,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
         { name: 'Hồ sơ cá nhân', path: '/profile', icon: UserCircleIcon },
       ];
     }
-    
+
     // Menu items cho CanBoDoan
     if (user?.role === 'CAN_BO_DOAN') {
       return [
@@ -66,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
         { name: 'Hồ sơ cá nhân', path: '/profile', icon: UserCircleIcon },
       ];
     }
-    
+
     // Menu items cho Admin
     if (user?.role === 'ADMIN') {
       return [
@@ -79,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
         { name: 'Hồ sơ cá nhân', path: '/profile', icon: UserCircleIcon },
       ];
     }
-    
+
     // Default menu items
     return [
       { name: 'Trang chủ', path: '/home', icon: HomeIcon },
@@ -97,34 +99,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
         {!isCollapsed ? (
           <>
             <Link to="/home" className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-md bg-blue-600 flex items-center justify-center text-white">
+              {/* <div className="h-8 w-8 rounded-md bg-blue-600 flex items-center justify-center text-white">
                 <span className="text-lg font-bold">Đ</span>
-              </div>
+              </div> */}
+              <img src={logo} alt="Logo" className="h-8 w-8" />
               <span className="text-lg font-bold text-blue-600">Đoàn Trường</span>
             </Link>
             {toggle && (
-              <button 
+              <button
                 className="md:hidden"
                 onClick={toggle}
               >
-                <svg 
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 text-gray-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M6 18L18 6M6 6l12 12" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               </button>
             )}
             {toggleCollapse && (
-              <button 
+              <button
                 className="hidden md:flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
                 onClick={toggleCollapse}
                 title="Thu gọn menu"
@@ -139,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
               <span className="text-lg font-bold">Đ</span>
             </div>
             {toggleCollapse && (
-              <button 
+              <button
                 className="mt-4 flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
                 onClick={toggleCollapse}
                 title="Mở rộng menu"
@@ -196,11 +199,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle, isCollapsed, toggleCo
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 text-sm font-medium rounded-lg ${
-                  pathname === item.path
-                    ? 'text-white bg-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 text-sm font-medium rounded-lg ${pathname === item.path
+                  ? 'text-white bg-blue-600'
+                  : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 title={isCollapsed ? item.name : ''}
               >
                 <item.icon className={`w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`} />

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { youth } from '../assets/images';
 
+import { setNavigate } from '../services/navigationService';
+
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +15,10 @@ const LoginPage = () => {
 
   const { login, isAuthenticated, isLoading: authLoading, error: authError } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate])
 
   // Cập nhật lỗi từ context
   useEffect(() => {
@@ -45,47 +51,32 @@ const LoginPage = () => {
   }, [loginSuccess, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
+
     // Xác thực đầu vào
     if (!username.trim()) {
       setError('Vui lòng nhập tên đăng nhập');
       return;
     }
-    
+
     if (!password) {
       setError('Vui lòng nhập mật khẩu');
       return;
     }
-    
+
     setError(null);
     setIsLoading(true);
     setLoginSuccess(false);
 
+
     try {
       console.log('Bắt đầu đăng nhập với:', username);
       await login({ username, password });
-      console.log('Đăng nhập thành công, đang chờ chuyển hướng...');
-      
-      // Đánh dấu đã đăng nhập thành công
-      setLoginSuccess(true);
-      
-      // Thử chuyển hướng trực tiếp nếu đã xác thực
-      if (localStorage.getItem('authTokens')) {
-        console.log('Token đã có trong localStorage, thử chuyển hướng ngay');
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 100);
-      }
+      console.log('Đăng nhập thành công');
+      // Không cần xử lý gì thêm, AuthContext sẽ cập nhật isAuthenticated
+      // và useEffect sẽ tự động chuyển hướng
     } catch (err: any) {
       console.error('Lỗi khi đăng nhập:', err);
-      setLoginSuccess(false);
-      // Xử lý lỗi chi tiết
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError('Tên đăng nhập hoặc mật khẩu không đúng');
-      }
+      // Lỗi sẽ được hiển thị từ AuthContext thông qua authError
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +114,7 @@ const LoginPage = () => {
           <div className="p-6 bg-white bg-opacity-10 rounded-lg shadow-lg">
             <h3 className="font-medium mb-3 text-center text-xl">Sứ mệnh</h3>
             <p className="text-sm opacity-90 text-center leading-relaxed">
-              "Xây dựng thế hệ trẻ Việt Nam phát triển toàn diện, giàu lòng yêu nước, 
+              "Xây dựng thế hệ trẻ Việt Nam phát triển toàn diện, giàu lòng yêu nước,
               có ý thức tự lực, tự cường, có lý tưởng sống cao đẹp."
             </p>
           </div>
@@ -161,7 +152,11 @@ const LoginPage = () => {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 Tên đăng nhập
@@ -222,7 +217,12 @@ const LoginPage = () => {
             <div>
               <button
                 type="submit"
+                // onClick={(e) => {
+                //   e.preventDefault(); // Ngăn hành vi mặc định
+                //   handleSubmit(e);
+                // }}
                 disabled={isLoading}
+
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm 
                            text-sm font-medium text-white bg-primary-600 hover:bg-primary-700
                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
@@ -241,7 +241,7 @@ const LoginPage = () => {
                 )}
               </button>
             </div>
-          </form>
+          </form >
 
           <div className="mt-8 text-center text-sm text-gray-500">
             <p>Tài khoản demo:</p>
