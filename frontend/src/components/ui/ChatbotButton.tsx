@@ -259,7 +259,7 @@ const ChatbotButton: React.FC = () => {
           </svg>
         </button>
       ) : (
-        <div className={`chat-container ${isAnimating ? 'chat-container-opening' : ''}`} style={{ width: '600px', height: '500px' }}>
+        <div className={`chat-container ${isAnimating ? 'chat-container-opening' : ''}`} style={{ width: '800px', height: '600px' }}>
           <div className="chat-header">
             <h3 className="font-medium chat-title-animation">Trợ lý Đoàn trường</h3>
             <button 
